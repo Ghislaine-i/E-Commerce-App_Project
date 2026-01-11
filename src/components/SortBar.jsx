@@ -2,7 +2,7 @@ const SortBar = ({ category, setCategory, sort, setSort }) => {
   return (
     <div style={{ marginBottom: "20px" }}>
       <select value={category} onChange={(e) => setCategory(e.target.value)}>
-        <option value="all">All</option>
+        <option value="all">Category</option>
         <option value="smartphones">Smartphones</option>
         <option value="laptops">Laptops</option>
         <option value="fragrances">Fragrances</option>

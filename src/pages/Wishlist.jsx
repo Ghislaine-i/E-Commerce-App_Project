@@ -5,11 +5,11 @@ const Wishlist = () => {
   const { wishlist, removeFromWishlist } = useContext(WishlistContext);
 
   if (wishlist.length === 0) {
-    return <h2 style={{ padding: "20px" }}>Your wishlist is empty</h2>;
+    return <h2>Your wishlist is empty</h2>;
   }
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div>
       <h1>Wishlist</h1>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "20px" }}>

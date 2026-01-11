@@ -1,9 +1,9 @@
 import { useState, useContext } from "react";
-import api from "../api/axios";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
-const Login = () => {
+const Signup = () => {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { login } = useContext(AuthContext);
@@ -12,26 +12,33 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log("Logging in with:", email, password);
-
-    try {
-      // Simulate login for testing
-      if (email.trim() === "atkinson-hudson@dummyjson.com" && password.trim() === "0lelplR") {
-        login({ username: "kminchelle", token: "fake" });
-        navigate("/dashboard");
-      } else {
-        throw new Error("Invalid");
-      }
-    } catch (err) {
-      alert("Invalid login");
+    // Simulate signup
+    if (name.trim() && email.trim() && password.trim()) {
+      // Simulate creating user
+      const newUser = {
+        id: Date.now(),
+        username: name.trim(),
+        email: email.trim(),
+        token: "fake"
+      };
+      login(newUser);
+      navigate("/dashboard");
+    } else {
+      alert("Please fill all fields");
     }
   };
 
   return (
     <div>
-      <h2>Login</h2>
+      <h2>Signup</h2>
 
       <form onSubmit={handleSubmit}>
+        <input
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+
         <input
           placeholder="Email"
           value={email}
@@ -45,14 +52,10 @@ const Login = () => {
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        <button type="submit">Login</button>
+        <button type="submit">Signup</button>
       </form>
-
-      <p>Use DummyJSON test account:</p>
-      <p><b>email:</b> atkinson-hudson@dummyjson.com</p>
-      <p><b>password:</b> 0lelplR</p>
     </div>
   );
 };
 
-export default Login;
+export default Signup;

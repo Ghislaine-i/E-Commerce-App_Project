@@ -1,30 +1,29 @@
 import { useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
-import api from "../api/axios";
+import { ProductContext } from "../context/ProductContext";
 
 const Dashboard = () => {
   const { user, logout } = useContext(AuthContext);
+  const { addProduct, updateProduct, deleteProduct } = useContext(ProductContext);
 
-  const addProduct = async () => {
-    await api.post("/products/add", {
+  const handleAddProduct = async () => {
+    await addProduct({
       title: "New Product",
       price: 100,
     });
-
-    alert("Product created (simulation)");
+    alert("Product created");
   };
 
-  const updateProduct = async () => {
-    await api.put("/products/1", {
+  const handleUpdateProduct = async () => {
+    await updateProduct(1, {
       price: 200,
     });
-
-    alert("Product updated (simulation)");
+    alert("Product updated");
   };
 
-  const deleteProduct = async () => {
-    await api.delete("/products/1");
-    alert("Product deleted (simulation)");
+  const handleDeleteProduct = async () => {
+    await deleteProduct(1);
+    alert("Product deleted");
   };
 
   return (
@@ -32,9 +31,9 @@ const Dashboard = () => {
       <h2>Dashboard</h2>
       <p>Welcome, {user?.username}</p>
 
-      <button onClick={addProduct}>Create Product</button>
-      <button onClick={updateProduct}>Update Product</button>
-      <button onClick={deleteProduct}>Delete Product</button>
+      <button onClick={handleAddProduct}>Create Product</button>
+      <button onClick={handleUpdateProduct}>Update Product</button>
+      <button onClick={handleDeleteProduct}>Delete Product</button>
 
       <br /><br />
       <button onClick={logout}>Logout</button>

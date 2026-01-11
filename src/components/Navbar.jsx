@@ -28,7 +28,10 @@ const Navbar = () => {
             <button onClick={logout} style={{ marginLeft: "20px", background: "red", color: "#fff", border: "none", padding: "5px 10px" }}>Logout</button>
           </>
         ) : (
-          <Link to="/login" style={{ color: "#fff" }}>Login</Link>
+          <>
+            <Link to="/login" style={{ color: "#fff", marginRight: "10px" }}>Login</Link>
+            <Link to="/signup" style={{ color: "#fff" }}>Signup</Link>
+          </>
         )}
       </div>
     </nav>
