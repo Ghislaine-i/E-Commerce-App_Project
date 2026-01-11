@@ -1,25 +1,55 @@
-import { useContext, useState } from "react";
+import { useState, useContext } from "react";
+import api from "../api/axios";
 import { AuthContext } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const { login } = useContext(AuthContext);
-  const [data, setData] = useState({ username: "", password: "" });
+  const navigate = useNavigate();
 
-  const submit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    await login(data);
+
+    try {
+      const res = await api.post("/auth/login", {
+        username,
+        password,
+      });
+
+      login(res.data);
+      navigate("/dashboard");
+    } catch (err) {
+      alert("Invalid login");
+    }
   };
 
   return (
-    <form onSubmit={submit}>
-      <input placeholder="Username"
-        onChange={(e) => setData({ ...data, username: e.target.value })}
-      />
-      <input type="password" placeholder="Password"
-        onChange={(e) => setData({ ...data, password: e.target.value })}
-      />
-      <button>Login</button>
-    </form>
+    <div>
+      <h2>Login</h2>
+
+      <form onSubmit={handleSubmit}>
+        <input
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
+
+        <input
+          placeholder="Password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        <button type="submit">Login</button>
+      </form>
+
+      <p>Use DummyJSON test account:</p>
+      <p><b>username:</b> kminchelle</p>
+      <p><b>password:</b> 0lelplR</p>
+    </div>
   );
 };
 
