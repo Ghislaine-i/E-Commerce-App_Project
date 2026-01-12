@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
@@ -7,27 +7,63 @@ const Login = () => {
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-    const { login } = useContext(AuthContext);
+    const { user, login } = useContext(AuthContext);
     const navigate = useNavigate();
+
+    // Redirect if already logged in
+    useEffect(() => {
+        if (user) {
+            console.log("User already logged in, redirecting to home");
+            navigate("/");
+        }
+    }, [user, navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
         setLoading(true);
 
-        try {
-            const result = await login(username, password);
+        // Validate inputs
+        if (!username || !password) {
+            setError("Please enter both username and password");
+            setLoading(false);
+            return;
+        }
 
-            if (result.success) {
-                navigate("/dashboard");
+        console.log("Form submitted");
+        console.log("Attempting login with:", {
+            username: username.trim(),
+            passwordLength: password.trim().length
+        });
+
+        try {
+            const result = await login(username.trim(), password.trim());
+
+            console.log("Login result received:", result);
+
+            if (result && result.success) {
+                console.log("Login successful! User data:", result.data);
+                // Small delay to ensure state is updated
+                setTimeout(() => {
+                    navigate("/");
+                }, 100);
             } else {
-                setError(result.message || "Invalid credentials");
+                console.error("Login failed:", result);
+                setError(result?.message || "Login failed. Please check your credentials.");
             }
         } catch (err) {
-            setError("An error occurred during login");
+            console.error("Login exception:", err);
+            setError("An unexpected error occurred. Please try again.");
         } finally {
             setLoading(false);
         }
+    };
+
+    // Quick fill demo credentials
+    const fillDemoCredentials = () => {
+        setUsername("emilys");
+        setPassword("emilyspass");
+        setError("");
     };
 
     return (
@@ -101,6 +137,22 @@ const Login = () => {
                             emilyspass
                         </code>
                     </p>
+                    <button
+                        onClick={fillDemoCredentials}
+                        style={{
+                            marginTop: "10px",
+                            padding: "6px 12px",
+                            background: "#0284c7",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "6px",
+                            fontSize: "12px",
+                            cursor: "pointer",
+                            fontWeight: "600",
+                        }}
+                    >
+                        Auto-fill Demo Credentials
+                    </button>
                 </div>
 
                 <form onSubmit={handleSubmit}>
@@ -121,6 +173,7 @@ const Login = () => {
                             onChange={(e) => setUsername(e.target.value)}
                             placeholder="Enter your username"
                             required
+                            autoComplete="username"
                             style={{
                                 width: "100%",
                                 padding: "12px",
@@ -129,6 +182,7 @@ const Login = () => {
                                 fontSize: "14px",
                                 outline: "none",
                                 transition: "border-color 0.2s",
+                                boxSizing: "border-box",
                             }}
                             onFocus={(e) => (e.target.style.borderColor = "#667eea")}
                             onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
@@ -152,6 +206,7 @@ const Login = () => {
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="Enter your password"
                             required
+                            autoComplete="current-password"
                             style={{
                                 width: "100%",
                                 padding: "12px",
@@ -160,6 +215,7 @@ const Login = () => {
                                 fontSize: "14px",
                                 outline: "none",
                                 transition: "border-color 0.2s",
+                                boxSizing: "border-box",
                             }}
                             onFocus={(e) => (e.target.style.borderColor = "#667eea")}
                             onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
@@ -226,6 +282,7 @@ const Login = () => {
                                 fontWeight: "600",
                                 cursor: "pointer",
                                 textDecoration: "underline",
+                                fontSize: "14px",
                             }}
                         >
                             Sign Up
