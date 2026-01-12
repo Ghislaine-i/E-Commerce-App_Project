@@ -4,24 +4,31 @@ export const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
     const [cart, setCart] = useState([]);
+    const [isLoaded, setIsLoaded] = useState(false);
 
     // Load cart from localStorage on mount
     useEffect(() => {
         const savedCart = localStorage.getItem("cart");
-        if (savedCart) {
+        if (savedCart && savedCart !== "null" && savedCart !== "undefined") {
             try {
-                setCart(JSON.parse(savedCart));
+                const parsedCart = JSON.parse(savedCart);
+                if (Array.isArray(parsedCart)) {
+                    setCart(parsedCart);
+                }
             } catch (error) {
                 console.error("Error parsing saved cart:", error);
                 localStorage.removeItem("cart");
             }
         }
+        setIsLoaded(true);
     }, []);
 
-    // Save cart to localStorage whenever it changes
+    // Save cart to localStorage whenever it changes (but only after initial load)
     useEffect(() => {
-        localStorage.setItem("cart", JSON.stringify(cart));
-    }, [cart]);
+        if (isLoaded) {
+            localStorage.setItem("cart", JSON.stringify(cart));
+        }
+    }, [cart, isLoaded]);
 
     const addToCart = (product) => {
         setCart((prev) => {

@@ -10,9 +10,10 @@ export const AuthProvider = ({ children }) => {
     useEffect(() => {
         // Load user from localStorage on mount
         const savedUser = localStorage.getItem("user");
-        if (savedUser) {
+        if (savedUser && savedUser !== "null" && savedUser !== "undefined") {
             try {
-                setUser(JSON.parse(savedUser));
+                const parsedUser = JSON.parse(savedUser);
+                setUser(parsedUser);
             } catch (error) {
                 console.error("Error parsing saved user:", error);
                 localStorage.removeItem("user");
@@ -20,15 +21,6 @@ export const AuthProvider = ({ children }) => {
         }
         setLoading(false);
     }, []);
-
-    useEffect(() => {
-        // Save user to localStorage whenever it changes
-        if (user) {
-            localStorage.setItem("user", JSON.stringify(user));
-        } else {
-            localStorage.removeItem("user");
-        }
-    }, [user]);
 
     const login = async (username, password) => {
         try {
@@ -39,8 +31,10 @@ export const AuthProvider = ({ children }) => {
             });
 
             if (response.data && response.data.token) {
-                setUser(response.data);
-                return { success: true, data: response.data };
+                const userData = response.data;
+                setUser(userData);
+                localStorage.setItem("user", JSON.stringify(userData));
+                return { success: true, data: userData };
             }
 
             return { success: false, message: "Invalid credentials" };
