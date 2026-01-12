@@ -10,28 +10,30 @@ const ProtectedRoute = ({ children }) => {
         return (
             <div
                 style={{
-                    minHeight: "100vh",
+                    minHeight: "calc(100vh - 70px)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
+                    background: "#f9fafb",
                 }}
             >
-                <div
-                    style={{
-                        border: "4px solid #f3f3f6",
-                        borderTop: "4px solid #667eea",
-                        borderRadius: "50%",
-                        width: "50px",
-                        height: "50px",
-                        animation: "spin 1s linear infinite",
-                    }}
-                />
-                <style>{`
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-          }
-        `}</style>
+                <div style={{ textAlign: "center" }}>
+                    <div
+                        style={{
+                            width: "50px",
+                            height: "50px",
+                            border: "4px solid #e5e7eb",
+                            borderTop: "4px solid #1f2937",
+                            borderRadius: "50%",
+                            animation: "spin 1s linear infinite",
+                            margin: "0 auto 20px",
+                        }}
+                    />
+                    <p style={{ color: "#6b7280", fontSize: "16px" }}>Loading...</p>
+                    <style>
+                        {`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}
+                    </style>
+                </div>
             </div>
         );
     }
@@ -41,7 +43,7 @@ const ProtectedRoute = ({ children }) => {
         return <Navigate to="/login" replace />;
     }
 
-    // Render the protected component
+    // Render children if authenticated
     return children;
 };
 

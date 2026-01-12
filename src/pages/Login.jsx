@@ -30,25 +30,14 @@ const Login = () => {
             return;
         }
 
-        console.log("Form submitted");
-        console.log("Attempting login with:", {
-            username: username.trim(),
-            passwordLength: password.trim().length
-        });
-
         try {
             const result = await login(username.trim(), password.trim());
 
-            console.log("Login result received:", result);
-
             if (result && result.success) {
-                console.log("Login successful! User data:", result.data);
-                // Small delay to ensure state is updated
                 setTimeout(() => {
                     navigate("/");
                 }, 100);
             } else {
-                console.error("Login failed:", result);
                 setError(result?.message || "Login failed. Please check your credentials.");
             }
         } catch (err) {
@@ -69,11 +58,11 @@ const Login = () => {
     return (
         <div
             style={{
-                minHeight: "100vh",
+                minHeight: "calc(100vh - 70px)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                background: "#1f2937",
                 padding: "20px",
             }}
         >
@@ -81,7 +70,7 @@ const Login = () => {
                 style={{
                     background: "white",
                     borderRadius: "15px",
-                    boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
+                    boxShadow: "0 10px 40px rgba(0,0,0,0.3)",
                     padding: "40px",
                     width: "100%",
                     maxWidth: "450px",
@@ -92,7 +81,7 @@ const Login = () => {
                         textAlign: "center",
                         marginBottom: "30px",
                         fontSize: "2rem",
-                        color: "#333",
+                        color: "#1f2937",
                     }}
                 >
                     Welcome Back
@@ -101,17 +90,17 @@ const Login = () => {
                 {/* Demo Credentials Info */}
                 <div
                     style={{
-                        background: "#e0f2fe",
-                        border: "1px solid #7dd3fc",
+                        background: "#f3f4f6",
+                        border: "1px solid #d1d5db",
                         borderRadius: "8px",
                         padding: "15px",
                         marginBottom: "25px",
                     }}
                 >
-                    <p style={{ margin: "0 0 10px 0", fontWeight: "600", color: "#0369a1" }}>
+                    <p style={{ margin: "0 0 10px 0", fontWeight: "600", color: "#1f2937" }}>
                         Demo Credentials:
                     </p>
-                    <p style={{ margin: "5px 0", fontSize: "14px", color: "#0c4a6e" }}>
+                    <p style={{ margin: "5px 0", fontSize: "14px", color: "#4b5563" }}>
                         <strong>Username:</strong>{" "}
                         <code
                             style={{
@@ -124,7 +113,7 @@ const Login = () => {
                             emilys
                         </code>
                     </p>
-                    <p style={{ margin: "5px 0", fontSize: "14px", color: "#0c4a6e" }}>
+                    <p style={{ margin: "5px 0", fontSize: "14px", color: "#4b5563" }}>
                         <strong>Password:</strong>{" "}
                         <code
                             style={{
@@ -142,7 +131,7 @@ const Login = () => {
                         style={{
                             marginTop: "10px",
                             padding: "6px 12px",
-                            background: "#0284c7",
+                            background: "#1f2937",
                             color: "white",
                             border: "none",
                             borderRadius: "6px",
@@ -184,7 +173,7 @@ const Login = () => {
                                 transition: "border-color 0.2s",
                                 boxSizing: "border-box",
                             }}
-                            onFocus={(e) => (e.target.style.borderColor = "#667eea")}
+                            onFocus={(e) => (e.target.style.borderColor = "#1f2937")}
                             onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
                         />
                     </div>
@@ -217,7 +206,7 @@ const Login = () => {
                                 transition: "border-color 0.2s",
                                 boxSizing: "border-box",
                             }}
-                            onFocus={(e) => (e.target.style.borderColor = "#667eea")}
+                            onFocus={(e) => (e.target.style.borderColor = "#1f2937")}
                             onBlur={(e) => (e.target.style.borderColor = "#d1d5db")}
                         />
                     </div>
@@ -244,9 +233,7 @@ const Login = () => {
                         style={{
                             width: "100%",
                             padding: "14px",
-                            background: loading
-                                ? "#9ca3af"
-                                : "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                            background: loading ? "#9ca3af" : "#1f2937",
                             color: "white",
                             border: "none",
                             borderRadius: "8px",
@@ -258,7 +245,7 @@ const Login = () => {
                         onMouseEnter={(e) => {
                             if (!loading) {
                                 e.target.style.transform = "translateY(-2px)";
-                                e.target.style.boxShadow = "0 4px 12px rgba(102, 126, 234, 0.4)";
+                                e.target.style.boxShadow = "0 4px 12px rgba(31, 41, 55, 0.4)";
                             }
                         }}
                         onMouseLeave={(e) => {
@@ -269,26 +256,6 @@ const Login = () => {
                         {loading ? "Logging in..." : "Login"}
                     </button>
                 </form>
-
-                <div style={{ textAlign: "center", marginTop: "20px" }}>
-                    <p style={{ color: "#6b7280", fontSize: "14px" }}>
-                        Don't have an account?{" "}
-                        <button
-                            onClick={() => navigate("/signup")}
-                            style={{
-                                background: "none",
-                                border: "none",
-                                color: "#667eea",
-                                fontWeight: "600",
-                                cursor: "pointer",
-                                textDecoration: "underline",
-                                fontSize: "14px",
-                            }}
-                        >
-                            Sign Up
-                        </button>
-                    </p>
-                </div>
             </div>
         </div>
     );

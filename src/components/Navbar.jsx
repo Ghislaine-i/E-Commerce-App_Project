@@ -18,7 +18,7 @@ const Navbar = () => {
     return (
         <nav
             style={{
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                background: "#1f2937",
                 boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
                 position: "sticky",
                 top: 0,
@@ -122,8 +122,8 @@ const Navbar = () => {
                                     boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
                                 }}
                             >
-                {getCartCount()}
-              </span>
+                                {getCartCount()}
+                            </span>
                         )}
                     </Link>
 
@@ -161,38 +161,38 @@ const Navbar = () => {
                                     boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
                                 }}
                             >
-                {wishlist.length}
-              </span>
+                                {wishlist.length}
+                            </span>
                         )}
                     </Link>
 
                     {/* Auth Buttons */}
                     {user ? (
                         <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-              <span
-                  style={{
-                      color: "white",
-                      fontSize: "14px",
-                      fontWeight: "500",
-                  }}
-              >
-                Hi, {user.firstName || user.username}
-              </span>
+                            <span
+                                style={{
+                                    color: "white",
+                                    fontSize: "14px",
+                                    fontWeight: "500",
+                                }}
+                            >
+                                Hi, {user.firstName || user.username}
+                            </span>
                             <button
                                 onClick={handleLogout}
                                 style={{
                                     padding: "8px 16px",
-                                    background: "rgba(255, 255, 255, 0.2)",
+                                    background: "#ef4444",
                                     color: "white",
-                                    border: "1px solid rgba(255, 255, 255, 0.3)",
+                                    border: "none",
                                     borderRadius: "8px",
                                     fontSize: "14px",
                                     fontWeight: "600",
                                     cursor: "pointer",
                                     transition: "background 0.2s",
                                 }}
-                                onMouseEnter={(e) => (e.target.style.background = "rgba(255, 255, 255, 0.3)")}
-                                onMouseLeave={(e) => (e.target.style.background = "rgba(255, 255, 255, 0.2)")}
+                                onMouseEnter={(e) => (e.target.style.background = "#dc2626")}
+                                onMouseLeave={(e) => (e.target.style.background = "#ef4444")}
                             >
                                 Logout
                             </button>
@@ -203,27 +203,8 @@ const Navbar = () => {
                                 <button
                                     style={{
                                         padding: "8px 16px",
-                                        background: "rgba(255, 255, 255, 0.2)",
-                                        color: "white",
-                                        border: "1px solid rgba(255, 255, 255, 0.3)",
-                                        borderRadius: "8px",
-                                        fontSize: "14px",
-                                        fontWeight: "600",
-                                        cursor: "pointer",
-                                        transition: "background 0.2s",
-                                    }}
-                                    onMouseEnter={(e) => (e.target.style.background = "rgba(255, 255, 255, 0.3)")}
-                                    onMouseLeave={(e) => (e.target.style.background = "rgba(255, 255, 255, 0.2)")}
-                                >
-                                    Login
-                                </button>
-                            </Link>
-                            <Link to="/signup">
-                                <button
-                                    style={{
-                                        padding: "8px 16px",
                                         background: "white",
-                                        color: "#667eea",
+                                        color: "#1f2937",
                                         border: "none",
                                         borderRadius: "8px",
                                         fontSize: "14px",
@@ -234,7 +215,7 @@ const Navbar = () => {
                                     onMouseEnter={(e) => (e.target.style.transform = "scale(1.05)")}
                                     onMouseLeave={(e) => (e.target.style.transform = "scale(1)")}
                                 >
-                                    Sign Up
+                                    Login
                                 </button>
                             </Link>
                         </div>

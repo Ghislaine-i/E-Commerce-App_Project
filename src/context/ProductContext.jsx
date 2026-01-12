@@ -4,11 +4,24 @@ import api from "../api/axios";
 export const ProductContext = createContext();
 
 export const ProductProvider = ({ children }) => {
-    const [products, setProducts] = useState([]);
+    const [products, setProducts] = useState(async () => {
+        if(localStorage.getItem("products")){
+            return JSON.parse(localStorage.getItem("products"));
+        }else{
+            const res = await api.get("/products/categories");
+            return res.data;
+        }
+    });
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
+    useEffect(() => {
+        if(!localStorage.getItem("products")){
+            localStorage.setItem("products", JSON.stringify(products))
+        }
+        console.log({init_products: products});
+    }, [])
     // Fetch categories on mount
     useEffect(() => {
         const fetchCategories = async () => {
@@ -42,6 +55,7 @@ export const ProductProvider = ({ children }) => {
 
             const response = await api.get(url);
             setProducts(response.data.products || []);
+            localStorage.setItem("products", JSON.stringify(products));
         } catch (err) {
             console.error("Error fetching products:", err);
             setError("Failed to fetch products. Please try again.");
