@@ -47,9 +47,9 @@ const Home = () => {
         }}>
             {/* Hero/Intro Section */}
             <div style={{
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                background: "white",
                 padding: "50px 20px",
-                color: "white",
+                color: "black",
                 position: "relative",
                 overflow: "hidden",
                 marginBottom: "25px"

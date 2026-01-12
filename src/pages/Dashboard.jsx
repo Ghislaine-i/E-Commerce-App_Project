@@ -160,9 +160,9 @@ const Dashboard = () => {
         <div style={{ minHeight: "calc(100vh - 70px)", background: "#f9fafb" }}>
             {/* Welcome Hero Section */}
             <div style={{
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                background: "none",
                 padding: "40px 20px",
-                color: "white",
+                color: "black",
                 position: "relative",
                 overflow: "hidden"
             }}>
