@@ -1,41 +1,248 @@
-import { Link } from "react-router-dom";
 import { useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 import { CartContext } from "../context/CartContext";
 import { WishlistContext } from "../context/WishlistContext";
-import { AuthContext } from "../context/AuthContext";
 
 const Navbar = () => {
-  const { cart } = useContext(CartContext);
-  const { wishlist } = useContext(WishlistContext);
-  const { user, logout } = useContext(AuthContext);
+    const { user, logout } = useContext(AuthContext);
+    const { getCartCount } = useContext(CartContext);
+    const { wishlist } = useContext(WishlistContext);
+    const navigate = useNavigate();
 
-  return (
-    <nav style={{ background: "#111", padding: "15px", color: "#fff", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-      <Link to="/" style={{ color: "#fff", textDecoration: "none", fontSize: "24px" }}>
-        E-Commerce
-      </Link>
+    const handleLogout = () => {
+        logout();
+        navigate("/");
+    };
 
-      <div>
-        <Link to="/cart" style={{ color: "#fff", marginRight: "20px" }}>
-          Cart ({cart.length})
-        </Link>
-        <Link to="/wishlist" style={{ color: "#fff", marginRight: "20px" }}>
-          Wishlist ({wishlist.length})
-        </Link>
-        {user ? (
-          <>
-            <span>Welcome, {user.username}</span>
-            <button onClick={logout} style={{ marginLeft: "20px", background: "red", color: "#fff", border: "none", padding: "5px 10px" }}>Logout</button>
-          </>
-        ) : (
-          <>
-            <Link to="/login" style={{ color: "#fff", marginRight: "10px" }}>Login</Link>
-            <Link to="/signup" style={{ color: "#fff" }}>Signup</Link>
-          </>
-        )}
-      </div>
-    </nav>
-  );
+    return (
+        <nav
+            style={{
+                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                boxShadow: "0 2px 10px rgba(0,0,0,0.1)",
+                position: "sticky",
+                top: 0,
+                zIndex: 1000,
+            }}
+        >
+            <div
+                style={{
+                    maxWidth: "1400px",
+                    margin: "0 auto",
+                    padding: "15px 20px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                }}
+            >
+                {/* Logo */}
+                <Link
+                    to="/"
+                    style={{
+                        fontSize: "1.8rem",
+                        fontWeight: "700",
+                        color: "white",
+                        textDecoration: "none",
+                        transition: "opacity 0.2s",
+                    }}
+                    onMouseEnter={(e) => (e.target.style.opacity = "0.8")}
+                    onMouseLeave={(e) => (e.target.style.opacity = "1")}
+                >
+                    🛍️ E-Commerce
+                </Link>
+
+                {/* Navigation Links */}
+                <div style={{ display: "flex", alignItems: "center", gap: "25px" }}>
+                    <Link
+                        to="/"
+                        style={{
+                            color: "white",
+                            textDecoration: "none",
+                            fontSize: "16px",
+                            fontWeight: "500",
+                            transition: "opacity 0.2s",
+                        }}
+                        onMouseEnter={(e) => (e.target.style.opacity = "0.8")}
+                        onMouseLeave={(e) => (e.target.style.opacity = "1")}
+                    >
+                        Products
+                    </Link>
+
+                    {user && (
+                        <Link
+                            to="/dashboard"
+                            style={{
+                                color: "white",
+                                textDecoration: "none",
+                                fontSize: "16px",
+                                fontWeight: "500",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "6px",
+                                transition: "opacity 0.2s",
+                            }}
+                            onMouseEnter={(e) => (e.target.style.opacity = "0.8")}
+                            onMouseLeave={(e) => (e.target.style.opacity = "1")}
+                        >
+                            📊 Dashboard
+                        </Link>
+                    )}
+
+                    {/* Cart */}
+                    <Link
+                        to="/cart"
+                        style={{
+                            position: "relative",
+                            color: "white",
+                            textDecoration: "none",
+                            fontSize: "22px",
+                            transition: "transform 0.2s",
+                            display: "inline-block",
+                        }}
+                        onMouseEnter={(e) => (e.target.style.transform = "scale(1.1)")}
+                        onMouseLeave={(e) => (e.target.style.transform = "scale(1)")}
+                    >
+                        🛒
+                        {getCartCount() > 0 && (
+                            <span
+                                style={{
+                                    position: "absolute",
+                                    top: "-8px",
+                                    right: "-10px",
+                                    background: "#ef4444",
+                                    color: "white",
+                                    fontSize: "11px",
+                                    fontWeight: "700",
+                                    borderRadius: "50%",
+                                    width: "20px",
+                                    height: "20px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                                }}
+                            >
+                {getCartCount()}
+              </span>
+                        )}
+                    </Link>
+
+                    {/* Wishlist */}
+                    <Link
+                        to="/wishlist"
+                        style={{
+                            position: "relative",
+                            color: "white",
+                            textDecoration: "none",
+                            fontSize: "22px",
+                            transition: "transform 0.2s",
+                            display: "inline-block",
+                        }}
+                        onMouseEnter={(e) => (e.target.style.transform = "scale(1.1)")}
+                        onMouseLeave={(e) => (e.target.style.transform = "scale(1)")}
+                    >
+                        ❤️
+                        {wishlist.length > 0 && (
+                            <span
+                                style={{
+                                    position: "absolute",
+                                    top: "-8px",
+                                    right: "-10px",
+                                    background: "#ec4899",
+                                    color: "white",
+                                    fontSize: "11px",
+                                    fontWeight: "700",
+                                    borderRadius: "50%",
+                                    width: "20px",
+                                    height: "20px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
+                                }}
+                            >
+                {wishlist.length}
+              </span>
+                        )}
+                    </Link>
+
+                    {/* Auth Buttons */}
+                    {user ? (
+                        <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+              <span
+                  style={{
+                      color: "white",
+                      fontSize: "14px",
+                      fontWeight: "500",
+                  }}
+              >
+                Hi, {user.firstName || user.username}
+              </span>
+                            <button
+                                onClick={handleLogout}
+                                style={{
+                                    padding: "8px 16px",
+                                    background: "rgba(255, 255, 255, 0.2)",
+                                    color: "white",
+                                    border: "1px solid rgba(255, 255, 255, 0.3)",
+                                    borderRadius: "8px",
+                                    fontSize: "14px",
+                                    fontWeight: "600",
+                                    cursor: "pointer",
+                                    transition: "background 0.2s",
+                                }}
+                                onMouseEnter={(e) => (e.target.style.background = "rgba(255, 255, 255, 0.3)")}
+                                onMouseLeave={(e) => (e.target.style.background = "rgba(255, 255, 255, 0.2)")}
+                            >
+                                Logout
+                            </button>
+                        </div>
+                    ) : (
+                        <div style={{ display: "flex", gap: "10px" }}>
+                            <Link to="/login">
+                                <button
+                                    style={{
+                                        padding: "8px 16px",
+                                        background: "rgba(255, 255, 255, 0.2)",
+                                        color: "white",
+                                        border: "1px solid rgba(255, 255, 255, 0.3)",
+                                        borderRadius: "8px",
+                                        fontSize: "14px",
+                                        fontWeight: "600",
+                                        cursor: "pointer",
+                                        transition: "background 0.2s",
+                                    }}
+                                    onMouseEnter={(e) => (e.target.style.background = "rgba(255, 255, 255, 0.3)")}
+                                    onMouseLeave={(e) => (e.target.style.background = "rgba(255, 255, 255, 0.2)")}
+                                >
+                                    Login
+                                </button>
+                            </Link>
+                            <Link to="/signup">
+                                <button
+                                    style={{
+                                        padding: "8px 16px",
+                                        background: "white",
+                                        color: "#667eea",
+                                        border: "none",
+                                        borderRadius: "8px",
+                                        fontSize: "14px",
+                                        fontWeight: "600",
+                                        cursor: "pointer",
+                                        transition: "transform 0.2s",
+                                    }}
+                                    onMouseEnter={(e) => (e.target.style.transform = "scale(1.05)")}
+                                    onMouseLeave={(e) => (e.target.style.transform = "scale(1)")}
+                                >
+                                    Sign Up
+                                </button>
+                            </Link>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </nav>
+    );
 };
 
 export default Navbar;
