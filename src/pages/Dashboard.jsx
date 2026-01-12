@@ -208,9 +208,9 @@ const Dashboard = () => {
             <div style={{ maxWidth: "1400px", margin: "0 auto", padding: "25px 20px" }}>
                 {/* Create Button */}
                 <div style={{ marginBottom: "25px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
-                    <button onClick={openCreateModal} style={{ padding: "14px 28px", background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", color: "white", border: "none", borderRadius: "12px", fontSize: "14px", fontWeight: "600", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", boxShadow: "0 4px 15px rgba(102, 126, 234, 0.4)", transition: "transform 0.2s, box-shadow 0.2s" }}
-                        onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 6px 20px rgba(102, 126, 234, 0.5)"; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 15px rgba(102, 126, 234, 0.4)"; }}>
+                    <button onClick={openCreateModal} style={{ padding: "14px 28px", background: "black", color: "white", border: "none", borderRadius: "12px", fontSize: "14px", fontWeight: "600", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", boxShadow: "0 4px 15px rgba(0, 0, 0, 0.4)", transition: "transform 0.2s, box-shadow 0.2s" }}
+                        onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 6px 20px rgba(0, 0, 0, 0.5)"; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 15px rgba(0, 0, 0, 0.4)"; }}>
                         <span style={{ fontSize: "18px" }}>+</span> Create New Product
                     </button>
                     <div style={{ background: "white", padding: "10px 20px", borderRadius: "10px", boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
