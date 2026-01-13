@@ -48,13 +48,6 @@ const Login = () => {
         }
     };
 
-    // Quick fill demo credentials
-    const fillDemoCredentials = () => {
-        setUsername("emilys");
-        setPassword("emilyspass");
-        setError("");
-    };
-
     return (
         <div
             style={{
@@ -86,63 +79,6 @@ const Login = () => {
                 >
                     Welcome Back
                 </h2>
-
-                {/* Demo Credentials Info */}
-                <div
-                    style={{
-                        background: "#f3f4f6",
-                        border: "1px solid #d1d5db",
-                        borderRadius: "8px",
-                        padding: "15px",
-                        marginBottom: "25px",
-                    }}
-                >
-                    <p style={{ margin: "0 0 10px 0", fontWeight: "600", color: "#1f2937" }}>
-                        Demo Credentials:
-                    </p>
-                    <p style={{ margin: "5px 0", fontSize: "14px", color: "#4b5563" }}>
-                        <strong>Username:</strong>{" "}
-                        <code
-                            style={{
-                                background: "white",
-                                padding: "2px 8px",
-                                borderRadius: "4px",
-                                fontSize: "13px",
-                            }}
-                        >
-                            emilys
-                        </code>
-                    </p>
-                    <p style={{ margin: "5px 0", fontSize: "14px", color: "#4b5563" }}>
-                        <strong>Password:</strong>{" "}
-                        <code
-                            style={{
-                                background: "white",
-                                padding: "2px 8px",
-                                borderRadius: "4px",
-                                fontSize: "13px",
-                            }}
-                        >
-                            emilyspass
-                        </code>
-                    </p>
-                    <button
-                        onClick={fillDemoCredentials}
-                        style={{
-                            marginTop: "10px",
-                            padding: "6px 12px",
-                            background: "#1f2937",
-                            color: "white",
-                            border: "none",
-                            borderRadius: "6px",
-                            fontSize: "12px",
-                            cursor: "pointer",
-                            fontWeight: "600",
-                        }}
-                    >
-                        Auto-fill Demo Credentials
-                    </button>
-                </div>
 
                 <form onSubmit={handleSubmit}>
                     <div style={{ marginBottom: "20px" }}>
