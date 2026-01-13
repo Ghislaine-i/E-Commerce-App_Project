@@ -39,7 +39,12 @@ const Dashboard = () => {
             const categoriesRes = await axios.get("https://dummyjson.com/products/category-list");
             setCategories(categoriesRes.data);
 
-            const productsRes = await axios.get("https://dummyjson.com/products?limit=10");
+            // First, get the total number of products
+            const initialRes = await axios.get("https://dummyjson.com/products?limit=0");
+            const totalProducts = initialRes.data.total;
+
+            // Fetch all products with the total count
+            const productsRes = await axios.get(`https://dummyjson.com/products?limit=${totalProducts}`);
             const apiProducts = productsRes.data.products;
 
             const stored = localStorage.getItem("myProducts");
@@ -55,7 +60,12 @@ const Dashboard = () => {
 
     const saveMyProducts = (updatedMyProducts) => {
         localStorage.setItem("myProducts", JSON.stringify(updatedMyProducts));
-        axios.get("https://dummyjson.com/products?limit=10")
+        // Reload all products after saving
+        axios.get("https://dummyjson.com/products?limit=0")
+            .then(res => {
+                const total = res.data.total;
+                return axios.get(`https://dummyjson.com/products?limit=${total}`);
+            })
             .then(res => {
                 setProducts([...updatedMyProducts, ...res.data.products]);
             });
@@ -149,7 +159,7 @@ const Dashboard = () => {
             <div style={{ minHeight: "calc(100vh - 70px)", display: "flex", alignItems: "center", justifyContent: "center", background: "#f9fafb" }}>
                 <div style={{ textAlign: "center" }}>
                     <div style={{ width: "60px", height: "60px", border: "5px solid #e5e7eb", borderTop: "5px solid #1f2937", borderRadius: "50%", animation: "spin 1s linear infinite", margin: "0 auto 20px" }} />
-                    <p style={{ color: "#6b7280", fontSize: "18px" }}>Loading...</p>
+                    <p style={{ color: "#6b7280", fontSize: "18px" }}>Loading all products...</p>
                     <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
                 </div>
             </div>
@@ -196,10 +206,6 @@ const Dashboard = () => {
                             <div style={{ fontSize: "24px", fontWeight: "800" }}>{products.length}</div>
                             <div style={{ fontSize: "12px", opacity: 0.9 }}>Total Products</div>
                         </div>
-                        <div style={{ background: "rgba(255,255,255,0.2)", backdropFilter: "blur(10px)", padding: "15px 25px", borderRadius: "12px" }}>
-                            <div style={{ fontSize: "24px", fontWeight: "800" }}>{products.filter(p => p.isMyProduct).length}</div>
-                            <div style={{ fontSize: "12px", opacity: 0.9 }}>My Products</div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -209,8 +215,8 @@ const Dashboard = () => {
                 {/* Create Button */}
                 <div style={{ marginBottom: "25px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
                     <button onClick={openCreateModal} style={{ padding: "14px 28px", background: "black", color: "white", border: "none", borderRadius: "12px", fontSize: "14px", fontWeight: "600", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", boxShadow: "0 4px 15px rgba(0, 0, 0, 0.4)", transition: "transform 0.2s, box-shadow 0.2s" }}
-                        onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 6px 20px rgba(0, 0, 0, 0.5)"; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 15px rgba(0, 0, 0, 0.4)"; }}>
+                            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 6px 20px rgba(0, 0, 0, 0.5)"; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 15px rgba(0, 0, 0, 0.4)"; }}>
                         <span style={{ fontSize: "18px" }}>+</span> Create New Product
                     </button>
                     <div style={{ background: "white", padding: "10px 20px", borderRadius: "10px", boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
