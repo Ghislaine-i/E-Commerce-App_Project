@@ -109,7 +109,7 @@ This app uses the [DummyJSON API](https://dummyjson.com/) for:
 - Authentication: `/auth/login`
 - CRUD: `/products/add`, `/products/{id}`, DELETE `/products/{id}`
   ##DEPLOYMENT LINK
-   https://ghislaine-i.github.io/E-Commerce-App_Project/
+   https://fecommerceapp.netlify.app/
 
 ## Contributing
 
