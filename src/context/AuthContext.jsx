@@ -6,16 +6,63 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [allUsers, setAllUsers] = useState([]);
+
+    // Fetch all users from API and store in localStorage
+    const fetchAllUsers = async () => {
+        try {
+            console.log("Fetching all users from API...");
+            const response = await axios.get("https://dummyjson.com/users");
+
+            if (response.data && response.data.users) {
+                const users = response.data.users;
+                console.log(`Fetched ${users.length} users from API`);
+
+                // Store users in localStorage
+                localStorage.setItem("allUsers", JSON.stringify(users));
+                setAllUsers(users);
+
+                console.log("All users stored in localStorage");
+                return users;
+            }
+        } catch (error) {
+            console.error("Error fetching users:", error);
+            return [];
+        }
+    };
+
+    // Load users from localStorage or fetch from API
+    const loadUsers = async () => {
+        const storedUsers = localStorage.getItem("allUsers");
+
+        if (storedUsers) {
+            const parsedUsers = JSON.parse(storedUsers);
+            console.log(`Loaded ${parsedUsers.length} users from localStorage`);
+            setAllUsers(parsedUsers);
+            return parsedUsers;
+        } else {
+            // If no users in localStorage, fetch from API
+            return await fetchAllUsers();
+        }
+    };
 
     // Check if user is already logged in on mount
     useEffect(() => {
-        const storedUser = localStorage.getItem("user");
-        const storedToken = localStorage.getItem("token");
+        const initializeAuth = async () => {
+            // Load all users first
+            await loadUsers();
 
-        if (storedUser && storedToken) {
-            setUser(JSON.parse(storedUser));
-        }
-        setLoading(false);
+            // Then check if user is logged in
+            const storedUser = localStorage.getItem("user");
+            const storedToken = localStorage.getItem("token");
+
+            if (storedUser && storedToken) {
+                setUser(JSON.parse(storedUser));
+            }
+            setLoading(false);
+        };
+
+        initializeAuth();
     }, []);
 
     const login = async (username, password) => {
@@ -133,12 +180,25 @@ export const AuthProvider = ({ children }) => {
         return localStorage.getItem("token");
     };
 
+    // Get all users
+    const getAllUsers = () => {
+        return allUsers;
+    };
+
+    // Refresh users from API
+    const refreshUsers = async () => {
+        return await fetchAllUsers();
+    };
+
     const value = {
         user,
         login,
         logout,
         getToken,
         loading,
+        allUsers,
+        getAllUsers,
+        refreshUsers,
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

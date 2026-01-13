@@ -39,18 +39,11 @@ const Dashboard = () => {
             const categoriesRes = await axios.get("https://dummyjson.com/products/category-list");
             setCategories(categoriesRes.data);
 
-            // First, get the total number of products
-            const initialRes = await axios.get("https://dummyjson.com/products?limit=0");
-            const totalProducts = initialRes.data.total;
-
-            // Fetch all products with the total count
-            const productsRes = await axios.get(`https://dummyjson.com/products?limit=${totalProducts}`);
+            // Fetch only 10 products from API and assign them to Emily
+            const productsRes = await axios.get("https://dummyjson.com/products?limit=10");
             const apiProducts = productsRes.data.products;
 
-            const stored = localStorage.getItem("myProducts");
-            const myProducts = stored ? JSON.parse(stored) : [];
-
-            setProducts([...myProducts, ...apiProducts]);
+            setProducts(apiProducts);
         } catch (error) {
             console.error("Error loading data:", error);
         } finally {
@@ -59,16 +52,8 @@ const Dashboard = () => {
     };
 
     const saveMyProducts = (updatedMyProducts) => {
-        localStorage.setItem("myProducts", JSON.stringify(updatedMyProducts));
-        // Reload all products after saving
-        axios.get("https://dummyjson.com/products?limit=0")
-            .then(res => {
-                const total = res.data.total;
-                return axios.get(`https://dummyjson.com/products?limit=${total}`);
-            })
-            .then(res => {
-                setProducts([...updatedMyProducts, ...res.data.products]);
-            });
+        // Just update the products state
+        setProducts(updatedMyProducts);
     };
 
     // Pagination
@@ -123,33 +108,31 @@ const Dashboard = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const stored = localStorage.getItem("myProducts");
-        const myProducts = stored ? JSON.parse(stored) : [];
 
         if (editingProduct) {
-            const updatedMyProducts = myProducts.map((p) =>
+            const updatedProducts = products.map((p) =>
                 p.id === editingProduct.id ? { ...p, ...formData, price: parseFloat(formData.price), stock: parseInt(formData.stock) } : p
             );
-            saveMyProducts(updatedMyProducts);
+            saveMyProducts(updatedProducts);
             alert("Product updated successfully!");
         } else {
-            const newProduct = { id: `my-${Date.now()}`, ...formData, price: parseFloat(formData.price), stock: parseInt(formData.stock), rating: 0, isMyProduct: true, createdAt: new Date().toISOString() };
-            saveMyProducts([newProduct, ...myProducts]);
+            const newProduct = {
+                id: Date.now(),
+                ...formData,
+                price: parseFloat(formData.price),
+                stock: parseInt(formData.stock),
+                rating: 0
+            };
+            saveMyProducts([newProduct, ...products]);
             alert("Product created successfully!");
         }
         setShowModal(false);
     };
 
     const handleDelete = (product) => {
-        if (!product.isMyProduct) {
-            alert("You can only delete products you created!");
-            return;
-        }
         if (window.confirm("Are you sure you want to delete this product?")) {
-            const stored = localStorage.getItem("myProducts");
-            const myProducts = stored ? JSON.parse(stored) : [];
-            const updatedMyProducts = myProducts.filter((p) => p.id !== product.id);
-            saveMyProducts(updatedMyProducts);
+            const updatedProducts = products.filter((p) => p.id !== product.id);
+            saveMyProducts(updatedProducts);
             alert("Product deleted successfully!");
         }
     };
@@ -204,7 +187,7 @@ const Dashboard = () => {
                     <div style={{ display: "flex", gap: "20px", marginTop: "20px" }}>
                         <div style={{ background: "rgba(255,255,255,0.2)", backdropFilter: "blur(10px)", padding: "15px 25px", borderRadius: "12px" }}>
                             <div style={{ fontSize: "24px", fontWeight: "800" }}>{products.length}</div>
-                            <div style={{ fontSize: "12px", opacity: 0.9 }}>Total Products</div>
+                            <div style={{ fontSize: "12px", opacity: 0.9 }}>{user?.firstName || user?.username}'s Products</div>
                         </div>
                     </div>
                 </div>
@@ -236,10 +219,8 @@ const Dashboard = () => {
                     <>
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "20px" }}>
                             {currentProducts.map((product) => (
-                                <div key={product.id} style={{ background: "white", borderRadius: "12px", overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.08)", border: product.isMyProduct ? "2px solid #10b981" : "2px solid transparent", position: "relative" }}>
-                                    {product.isMyProduct && (
-                                        <div style={{ position: "absolute", top: "10px", right: "10px", background: "#10b981", color: "white", padding: "4px 10px", borderRadius: "15px", fontSize: "11px", fontWeight: "600", zIndex: 10 }}>My Product</div>
-                                    )}
+                                <div key={product.id} style={{ background: "white", borderRadius: "12px", overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.08)", border: "2px solid #10b981", position: "relative" }}>
+                                    <div style={{ position: "absolute", top: "10px", right: "10px", background: "#10b981", color: "white", padding: "4px 10px", borderRadius: "15px", fontSize: "11px", fontWeight: "600", zIndex: 10 }}>My Product</div>
                                     <div style={{ width: "100%", height: "180px", background: "#f3f4f6", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
                                         {product.thumbnail ? (
                                             <img src={product.thumbnail} alt={product.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -254,12 +235,10 @@ const Dashboard = () => {
                                             <div style={{ fontSize: "20px", fontWeight: "800", color: "#1f2937" }}>${product.price}</div>
                                             <div style={{ fontSize: "14px", fontWeight: "700", color: product.stock > 10 ? "#10b981" : "#ef4444" }}>{product.stock} in stock</div>
                                         </div>
-                                        {product.isMyProduct && (
-                                            <div style={{ display: "flex", gap: "8px" }}>
-                                                <button onClick={() => openEditModal(product)} style={{ flex: 1, padding: "8px", background: "#3b82f6", color: "white", border: "none", borderRadius: "8px", fontSize: "13px", fontWeight: "600", cursor: "pointer" }}>✏️ Edit</button>
-                                                <button onClick={() => handleDelete(product)} style={{ flex: 1, padding: "8px", background: "#ef4444", color: "white", border: "none", borderRadius: "8px", fontSize: "13px", fontWeight: "600", cursor: "pointer" }}>🗑️ Delete</button>
-                                            </div>
-                                        )}
+                                        <div style={{ display: "flex", gap: "8px" }}>
+                                            <button onClick={() => openEditModal(product)} style={{ flex: 1, padding: "8px", background: "#3b82f6", color: "white", border: "none", borderRadius: "8px", fontSize: "13px", fontWeight: "600", cursor: "pointer" }}>✏️ Edit</button>
+                                            <button onClick={() => handleDelete(product)} style={{ flex: 1, padding: "8px", background: "#ef4444", color: "white", border: "none", borderRadius: "8px", fontSize: "13px", fontWeight: "600", cursor: "pointer" }}>🗑️ Delete</button>
+                                        </div>
                                     </div>
                                 </div>
                             ))}
