@@ -110,7 +110,7 @@ This app uses the [DummyJSON API](https://dummyjson.com/) for:
 - CRUD: `/products/add`, `/products/{id}`, DELETE `/products/{id}`
   
 ## DEPLOYMENT LINK
-https://fecommerceapp.netlify.app/
+https://solvitecommerce.netlify.app/
 
 ## Contributing
 
