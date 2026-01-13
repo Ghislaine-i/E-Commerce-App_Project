@@ -219,8 +219,7 @@ const Dashboard = () => {
                     <>
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "20px" }}>
                             {currentProducts.map((product) => (
-                                <div key={product.id} style={{ background: "white", borderRadius: "12px", overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.08)", border: "2px solid #10b981", position: "relative" }}>
-                                    <div style={{ position: "absolute", top: "10px", right: "10px", background: "#10b981", color: "white", padding: "4px 10px", borderRadius: "15px", fontSize: "11px", fontWeight: "600", zIndex: 10 }}>My Product</div>
+                                <div key={product.id} style={{ background: "white", borderRadius: "12px", overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.08)", border: "2px solid transparent", position: "relative" }}>
                                     <div style={{ width: "100%", height: "180px", background: "#f3f4f6", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
                                         {product.thumbnail ? (
                                             <img src={product.thumbnail} alt={product.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
