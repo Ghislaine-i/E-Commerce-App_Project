@@ -48,7 +48,7 @@ const Navbar = () => {
                     onMouseEnter={(e) => (e.target.style.opacity = "0.8")}
                     onMouseLeave={(e) => (e.target.style.opacity = "1")}
                 >
-                    🛍️ E-Commerce
+                    🛍️ E-HUB Collections
                 </Link>
 
                 {/* Navigation Links */}
