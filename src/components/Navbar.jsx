@@ -39,16 +39,22 @@ const Navbar = () => {
                 <Link
                     to="/"
                     style={{
-                        fontSize: "1.8rem",
-                        fontWeight: "700",
+                        fontSize: "1.6rem",
+                        fontWeight: "800",
                         color: "white",
                         textDecoration: "none",
-                        transition: "opacity 0.2s",
+                        letterSpacing: "-1px",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px"
                     }}
-                    onMouseEnter={(e) => (e.target.style.opacity = "0.8")}
-                    onMouseLeave={(e) => (e.target.style.opacity = "1")}
                 >
-                    🛍️ E-HUB Collections
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: "4px" }}>
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                    Collections
                 </Link>
 
                 {/* Navigation Links */}
@@ -84,7 +90,7 @@ const Navbar = () => {
                             onMouseEnter={(e) => (e.target.style.opacity = "0.8")}
                             onMouseLeave={(e) => (e.target.style.opacity = "1")}
                         >
-                            📊 Dashboard
+                            Dashboard
                         </Link>
                     )}
 
@@ -102,7 +108,11 @@ const Navbar = () => {
                         onMouseEnter={(e) => (e.target.style.transform = "scale(1.1)")}
                         onMouseLeave={(e) => (e.target.style.transform = "scale(1)")}
                     >
-                        🛒
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="9" cy="21" r="1"></circle>
+                            <circle cx="20" cy="21" r="1"></circle>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                        </svg>
                         {getCartCount() > 0 && (
                             <span
                                 style={{
@@ -141,7 +151,9 @@ const Navbar = () => {
                         onMouseEnter={(e) => (e.target.style.transform = "scale(1.1)")}
                         onMouseLeave={(e) => (e.target.style.transform = "scale(1)")}
                     >
-                        ❤️
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.72-8.72 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
                         {wishlist.length > 0 && (
                             <span
                                 style={{

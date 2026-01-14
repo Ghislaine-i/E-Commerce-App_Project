@@ -2,6 +2,7 @@ import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { WishlistContext } from "../context/WishlistContext";
+import { toast } from "react-toastify";
 
 const ProductCard = ({ product }) => {
     const { addToCart } = useContext(CartContext);
@@ -96,31 +97,40 @@ const ProductCard = ({ product }) => {
                     onClick={handleWishlistToggle}
                     style={{
                         position: "absolute",
-                        top: "10px",
-                        right: "10px",
-                        width: "32px",
-                        height: "32px",
-                        background: inWishlist
-                            ? "rgba(239, 68, 68, 0.95)"
-                            : "rgba(255, 255, 255, 0.95)",
+                        top: "12px",
+                        right: "12px",
+                        width: "36px",
+                        height: "36px",
+                        background: "white",
                         border: "none",
                         borderRadius: "50%",
-                        fontSize: "16px",
                         cursor: "pointer",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                        transition: "transform 0.2s",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                        transition: "all 0.2s",
+                        padding: 0,
                     }}
                     onMouseEnter={(e) => {
-                        e.target.style.transform = "scale(1.1)";
+                        e.currentTarget.style.transform = "scale(1.1)";
                     }}
                     onMouseLeave={(e) => {
-                        e.target.style.transform = "scale(1)";
+                        e.currentTarget.style.transform = "scale(1)";
                     }}
                 >
-                    {inWishlist ? "❤️" : "🤍"}
+                    <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill={inWishlist ? "#ef4444" : "none"}
+                        stroke={inWishlist ? "#ef4444" : "#4b5563"}
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                    >
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.72-8.72 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
                 </button>
             </div>
 
@@ -186,31 +196,43 @@ const ProductCard = ({ product }) => {
                     onClick={(e) => {
                         e.stopPropagation();
                         addToCart(product);
+                        toast.success(`'${product.title}' added to cart!`);
                     }}
                     disabled={product.stock === 0}
                     style={{
                         width: "100%",
-                        padding: "10px",
+                        padding: "12px",
                         background: product.stock === 0 ? "#e5e7eb" : "#1f2937",
                         color: product.stock === 0 ? "#9ca3af" : "white",
                         border: "none",
-                        borderRadius: "8px",
-                        fontSize: "13px",
+                        borderRadius: "10px",
+                        fontSize: "14px",
                         fontWeight: "600",
                         cursor: product.stock === 0 ? "not-allowed" : "pointer",
-                        transition: "transform 0.2s, box-shadow 0.2s",
+                        transition: "all 0.2s",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "8px"
                     }}
                     onMouseEnter={(e) => {
                         if (product.stock > 0) {
-                            e.target.style.transform = "translateY(-2px)";
-                            e.target.style.boxShadow = "0 4px 12px rgba(31, 41, 55, 0.4)";
+                            e.currentTarget.style.background = "#000";
+                            e.currentTarget.style.transform = "translateY(-2px)";
                         }
                     }}
                     onMouseLeave={(e) => {
-                        e.target.style.transform = "translateY(0)";
-                        e.target.style.boxShadow = "none";
+                        if (product.stock > 0) {
+                            e.currentTarget.style.background = "#1f2937";
+                            e.currentTarget.style.transform = "translateY(0)";
+                        }
                     }}
                 >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
                     {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
                 </button>
             </div>

@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { CartContext } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Cart = () => {
     const { cart, removeFromCart, updateQuantity, getCartTotal, clearCart } =
@@ -20,7 +21,13 @@ const Cart = () => {
                     background: "#f9fafb",
                 }}
             >
-                <div style={{ fontSize: "4rem", marginBottom: "20px" }}>🛒</div>
+                <div style={{ marginBottom: "20px", color: "#d1d5db" }}>
+                    <svg width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                </div>
                 <h2 style={{ fontSize: "2rem", marginBottom: "10px", color: "#1f2937" }}>
                     Your cart is empty
                 </h2>
@@ -152,16 +159,22 @@ const Cart = () => {
                                         <button
                                             onClick={() => removeFromCart(item.id)}
                                             style={{
-                                                padding: "6px 12px",
+                                                padding: "7px",
                                                 background: "#fee2e2",
                                                 color: "#991b1b",
                                                 border: "none",
                                                 borderRadius: "6px",
-                                                fontSize: "12px",
                                                 cursor: "pointer",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                justifyContent: "center"
                                             }}
+                                            title="Remove from cart"
                                         >
-                                            Remove
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M3 6h18"></path>
+                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                            </svg>
                                         </button>
                                     </div>
                                 </div>
@@ -220,7 +233,7 @@ const Cart = () => {
                                 cursor: "pointer",
                                 marginBottom: "10px",
                             }}
-                            onClick={() => alert("Checkout functionality would go here!")}
+                            onClick={() => toast.info("Checkout functionality is coming soon!")}
                         >
                             Proceed to Checkout
                         </button>

@@ -2,7 +2,8 @@ import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { CartContext } from "../context/CartContext";
 import { WishlistContext } from "../context/WishlistContext";
-import axios from "axios";
+import api from "../api/axios";
+import { toast } from "react-toastify";
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -22,8 +23,21 @@ const ProductDetail = () => {
         const fetchProduct = async () => {
             setLoading(true);
             try {
-                const response = await axios.get(`https://dummyjson.com/products/${id}`);
-                setProduct(response.data);
+                // If it's a local product (starts with 'my-')
+                if (id && id.toString().startsWith("my-")) {
+                    const stored = localStorage.getItem("myProducts");
+                    const myProducts = stored ? JSON.parse(stored) : [];
+                    const localProduct = myProducts.find(p => p.id === id);
+
+                    if (localProduct) {
+                        setProduct(localProduct);
+                    } else {
+                        setError("Product not found");
+                    }
+                } else {
+                    const response = await api.get(`/products/${id}`);
+                    setProduct(response.data);
+                }
             } catch (err) {
                 console.error("Error fetching product:", err);
                 setError("Failed to load product. Please try again.");
@@ -38,7 +52,7 @@ const ProductDetail = () => {
         for (let i = 0; i < quantity; i++) {
             addToCart(product);
         }
-        alert(`Added ${quantity} item(s) to cart!`);
+        toast.success(`Added ${quantity} item(s) to cart!`);
     };
 
     const handleWishlistToggle = () => {
@@ -133,7 +147,7 @@ const ProductDetail = () => {
 
                         {/* Rating */}
                         <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "18px" }}>
-                            <span style={{ color: "#fbbf24", fontSize: "18px" }}>⭐</span>
+                            <span style={{ color: "#fbbf24", fontSize: "18px" }}>★</span>
                             <span style={{ fontSize: "16px", fontWeight: "600" }}>{product.rating}</span>
                             <span style={{ color: "#6b7280", fontSize: "14px" }}>({product.reviews?.length || 0} reviews)</span>
                         </div>
@@ -188,31 +202,75 @@ const ProductDetail = () => {
                                 disabled={product.stock === 0}
                                 style={{
                                     flex: 1,
-                                    padding: "14px",
+                                    padding: "16px",
                                     background: product.stock === 0 ? "#e5e7eb" : "#1f2937",
                                     color: product.stock === 0 ? "#9ca3af" : "white",
                                     border: "none",
-                                    borderRadius: "10px",
+                                    borderRadius: "12px",
                                     fontSize: "15px",
                                     fontWeight: "600",
                                     cursor: product.stock === 0 ? "not-allowed" : "pointer",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    gap: "10px",
+                                    transition: "all 0.2s"
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (product.stock > 0) {
+                                        e.currentTarget.style.background = "#000";
+                                        e.currentTarget.style.transform = "translateY(-2px)";
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (product.stock > 0) {
+                                        e.currentTarget.style.background = "#1f2937";
+                                        e.currentTarget.style.transform = "translateY(0)";
+                                    }
                                 }}
                             >
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <circle cx="9" cy="21" r="1"></circle>
+                                    <circle cx="20" cy="21" r="1"></circle>
+                                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                                </svg>
                                 {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
                             </button>
                             <button
                                 onClick={handleWishlistToggle}
                                 style={{
                                     padding: "14px 18px",
-                                    background: inWishlist ? "#fee2e2" : "#f3f4f6",
-                                    color: inWishlist ? "#991b1b" : "#374151",
-                                    border: "none",
-                                    borderRadius: "10px",
-                                    fontSize: "18px",
+                                    background: "white",
+                                    color: "#374151",
+                                    border: "1px solid #d1d5db",
+                                    borderRadius: "12px",
                                     cursor: "pointer",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    transition: "all 0.2s"
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = "#f3f4f6";
+                                    e.currentTarget.style.transform = "translateY(-2px)";
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = "white";
+                                    e.currentTarget.style.transform = "translateY(0)";
                                 }}
                             >
-                                {inWishlist ? "❤️" : "🤍"}
+                                <svg
+                                    width="24"
+                                    height="24"
+                                    viewBox="0 0 24 24"
+                                    fill={inWishlist ? "#ef4444" : "none"}
+                                    stroke={inWishlist ? "#ef4444" : "#4b5563"}
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l8.72-8.72 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                </svg>
                             </button>
                         </div>
 

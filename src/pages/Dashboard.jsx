@@ -1,7 +1,8 @@
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../api/axios";
+import { toast } from "react-toastify";
 
 const Dashboard = () => {
     const { user } = useContext(AuthContext);
@@ -30,30 +31,58 @@ const Dashboard = () => {
             navigate("/login");
             return;
         }
+        // Load products, categories and users on mount
         loadInitialData();
     }, [user, navigate]);
 
     const loadInitialData = async () => {
         setLoading(true);
         try {
-            const categoriesRes = await axios.get("https://dummyjson.com/products/category-list");
+            // Fetch categories
+            const categoriesRes = await api.get("/products/category-list");
             setCategories(categoriesRes.data);
 
-            // Fetch only 10 products from API and assign them to Emily
-            const productsRes = await axios.get("https://dummyjson.com/products?limit=10");
-            const apiProducts = productsRes.data.products;
+            // Fetch API products (Emily's products are more like 10)
+            const apiRes = await api.get("/products?limit=10");
 
-            setProducts(apiProducts);
+            // Get local storage data
+            const storedMyProducts = localStorage.getItem("myProducts");
+            const myProducts = storedMyProducts ? JSON.parse(storedMyProducts) : [];
+
+            const storedDeleted = localStorage.getItem("deletedProducts");
+            const deletedIds = storedDeleted ? JSON.parse(storedDeleted) : [];
+
+            const apiProducts = apiRes.data.products
+                .filter(p => !deletedIds.includes(p.id)) // Filter out "deleted" API products
+                .map(p => {
+                    // Check if there is a local override for this API product
+                    const override = myProducts.find(mp => mp.id === p.id);
+                    return override ? { ...p, ...override, isMyProduct: true, ownerId: user?.id } : { ...p, isMyProduct: true, ownerId: user?.id };
+                });
+
+            // Filter locally created products (only those not overriding API ones)
+            const userProducts = myProducts.filter(p => p.ownerId === user?.id && !apiRes.data.products.some(ap => ap.id === p.id));
+
+            // Merge products: Local ones first, then API ones (or overrides)
+            setProducts([...userProducts, ...apiProducts]);
+
+            // Fetch users list for future use (store in localStorage)
+            const usersRes = await api.get("/users");
+            localStorage.setItem("users", JSON.stringify(usersRes.data.users));
         } catch (error) {
             console.error("Error loading data:", error);
+            toast.error("Failed to load initial data");
         } finally {
             setLoading(false);
         }
     };
 
     const saveMyProducts = (updatedMyProducts) => {
-        // Just update the products state
-        setProducts(updatedMyProducts);
+        // Persist locally created products with ownerId
+        localStorage.setItem("myProducts", JSON.stringify(updatedMyProducts));
+
+        // Re-load to maintain merge with API products
+        loadInitialData();
     };
 
     // Pagination
@@ -75,11 +104,11 @@ const Dashboard = () => {
         const file = e.target.files?.[0];
         if (file) {
             if (!file.type.startsWith('image/')) {
-                alert('Please select an image file');
+                toast.error('Please select an image file');
                 return;
             }
             if (file.size > 5 * 1024 * 1024) {
-                alert('Image size should be less than 5MB');
+                toast.error('Image size should be less than 5MB');
                 return;
             }
             const reader = new FileReader();
@@ -108,32 +137,67 @@ const Dashboard = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        const stored = localStorage.getItem("myProducts");
+        const myProducts = stored ? JSON.parse(stored) : [];
 
         if (editingProduct) {
-            const updatedProducts = products.map((p) =>
-                p.id === editingProduct.id ? { ...p, ...formData, price: parseFloat(formData.price), stock: parseInt(formData.stock) } : p
-            );
-            saveMyProducts(updatedProducts);
-            alert("Product updated successfully!");
+            // Update logic: if it exists in myProducts, update it. If not (API product), add it as override.
+            const exists = myProducts.some(p => p.id === editingProduct.id);
+            let updatedMyProducts;
+
+            if (exists) {
+                updatedMyProducts = myProducts.map((p) =>
+                    p.id === editingProduct.id ? { ...p, ...formData, price: parseFloat(formData.price), stock: parseInt(formData.stock) } : p
+                );
+            } else {
+                updatedMyProducts = [{ ...editingProduct, ...formData, price: parseFloat(formData.price), stock: parseInt(formData.stock), ownerId: user?.id }, ...myProducts];
+            }
+
+            saveMyProducts(updatedMyProducts);
+            toast.success("Product updated successfully!");
         } else {
             const newProduct = {
-                id: Date.now(),
+                id: `my-${Date.now()}`,
                 ...formData,
                 price: parseFloat(formData.price),
                 stock: parseInt(formData.stock),
-                rating: 0
+                rating: 0,
+                isMyProduct: true,
+                ownerId: user?.id,
+                images: [formData.thumbnail || ""],
+                createdAt: new Date().toISOString()
             };
-            saveMyProducts([newProduct, ...products]);
-            alert("Product created successfully!");
+            saveMyProducts([newProduct, ...myProducts]);
+            toast.success("Product created successfully!");
         }
         setShowModal(false);
     };
 
     const handleDelete = (product) => {
         if (window.confirm("Are you sure you want to delete this product?")) {
-            const updatedProducts = products.filter((p) => p.id !== product.id);
-            saveMyProducts(updatedProducts);
-            alert("Product deleted successfully!");
+            const isApiProduct = typeof product.id === 'number';
+
+            if (isApiProduct) {
+                // Store in deletedProducts for API products
+                const storedDeleted = localStorage.getItem("deletedProducts");
+                const deletedIds = storedDeleted ? JSON.parse(storedDeleted) : [];
+                localStorage.setItem("deletedProducts", JSON.stringify([...deletedIds, product.id]));
+
+                // Also remove any local override
+                const stored = localStorage.getItem("myProducts");
+                const myProducts = stored ? JSON.parse(stored) : [];
+                localStorage.setItem("myProducts", JSON.stringify(myProducts.filter(p => p.id !== product.id)));
+
+                toast.success("API product hidden from dashboard");
+            } else {
+                // Normal local product deletion
+                const stored = localStorage.getItem("myProducts");
+                const myProducts = stored ? JSON.parse(stored) : [];
+                const updatedMyProducts = myProducts.filter((p) => p.id !== product.id);
+                localStorage.setItem("myProducts", JSON.stringify(updatedMyProducts));
+                toast.success("Product deleted successfully!");
+            }
+            loadInitialData();
         }
     };
 
@@ -142,7 +206,7 @@ const Dashboard = () => {
             <div style={{ minHeight: "calc(100vh - 70px)", display: "flex", alignItems: "center", justifyContent: "center", background: "#f9fafb" }}>
                 <div style={{ textAlign: "center" }}>
                     <div style={{ width: "60px", height: "60px", border: "5px solid #e5e7eb", borderTop: "5px solid #1f2937", borderRadius: "50%", animation: "spin 1s linear infinite", margin: "0 auto 20px" }} />
-                    <p style={{ color: "#6b7280", fontSize: "18px" }}>Loading all products...</p>
+                    <p style={{ color: "#6b7280", fontSize: "18px" }}>Loading your products...</p>
                     <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
                 </div>
             </div>
@@ -151,6 +215,7 @@ const Dashboard = () => {
 
     return (
         <div style={{ minHeight: "calc(100vh - 70px)", background: "#f9fafb" }}>
+
             {/* Welcome Hero Section */}
             <div style={{
                 background: "none",
@@ -171,15 +236,8 @@ const Dashboard = () => {
                 }} />
                 <div style={{ maxWidth: "1400px", margin: "0 auto", position: "relative", zIndex: 1 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "15px", marginBottom: "12px" }}>
-                        <span style={{ fontSize: "40px" }}>👋</span>
-                        <div>
-                            <h1 style={{ margin: 0, fontSize: "28px", fontWeight: "700" }}>
-                                Hello, {user?.firstName || user?.username}!
-                            </h1>
-                            <p style={{ margin: "5px 0 0 0", opacity: 0.9, fontSize: "16px" }}>
-                                Welcome to your product dashboard
-                            </p>
-                        </div>
+                        <h2 style={{ margin: 0, fontSize: "28px", fontWeight: "700" }}>Welcome, {user?.firstName || user?.username}</h2>
+                        <p style={{ marginTop: "8px", opacity: 0.9, fontSize: "16px" }}>Your product dashboard</p>
                     </div>
                     <p style={{ margin: "15px 0 0 0", fontSize: "14px", opacity: 0.85, maxWidth: "600px", lineHeight: 1.6 }}>
                         Manage your products, track inventory, and grow your business. Create new products or browse through your catalog below.
@@ -187,7 +245,7 @@ const Dashboard = () => {
                     <div style={{ display: "flex", gap: "20px", marginTop: "20px" }}>
                         <div style={{ background: "rgba(255,255,255,0.2)", backdropFilter: "blur(10px)", padding: "15px 25px", borderRadius: "12px" }}>
                             <div style={{ fontSize: "24px", fontWeight: "800" }}>{products.length}</div>
-                            <div style={{ fontSize: "12px", opacity: 0.9 }}>{user?.firstName || user?.username}'s Products</div>
+                            <div style={{ fontSize: "12px", opacity: 0.9 }}>Total Products</div>
                         </div>
                     </div>
                 </div>
@@ -198,8 +256,8 @@ const Dashboard = () => {
                 {/* Create Button */}
                 <div style={{ marginBottom: "25px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px" }}>
                     <button onClick={openCreateModal} style={{ padding: "14px 28px", background: "black", color: "white", border: "none", borderRadius: "12px", fontSize: "14px", fontWeight: "600", cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", boxShadow: "0 4px 15px rgba(0, 0, 0, 0.4)", transition: "transform 0.2s, box-shadow 0.2s" }}
-                            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 6px 20px rgba(0, 0, 0, 0.5)"; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 15px rgba(0, 0, 0, 0.4)"; }}>
+                        onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 6px 20px rgba(0, 0, 0, 0.5)"; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 15px rgba(0, 0, 0, 0.4)"; }}>
                         <span style={{ fontSize: "18px" }}>+</span> Create New Product
                     </button>
                     <div style={{ background: "white", padding: "10px 20px", borderRadius: "10px", boxShadow: "0 2px 8px rgba(0,0,0,0.08)" }}>
@@ -212,19 +270,22 @@ const Dashboard = () => {
                 {/* Products Grid */}
                 {products.length === 0 ? (
                     <div style={{ textAlign: "center", padding: "60px 20px", background: "white", borderRadius: "16px" }}>
-                        <div style={{ fontSize: "48px", marginBottom: "15px" }}>📦</div>
-                        <p style={{ fontSize: "18px", color: "#6b7280" }}>No products yet. Create your first product!</p>
+                        <div style={{ fontSize: "48px", marginBottom: "15px" }}>No products yet.</div>
+                        <p style={{ fontSize: "18px", color: "#6b7280" }}>Create your first product!</p>
                     </div>
                 ) : (
                     <>
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "20px" }}>
                             {currentProducts.map((product) => (
-                                <div key={product.id} style={{ background: "white", borderRadius: "12px", overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.08)", border: "2px solid transparent", position: "relative" }}>
+                                <div key={product.id} style={{ background: "white", borderRadius: "12px", overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.08)", border: product.isMyProduct ? "2px solid #10b981" : "2px solid transparent", position: "relative" }}>
+                                    {product.isMyProduct && (
+                                        <div style={{ position: "absolute", top: "10px", right: "10px", background: "#10b981", color: "white", padding: "4px 10px", borderRadius: "15px", fontSize: "11px", fontWeight: "600", zIndex: 10 }}>My Product</div>
+                                    )}
                                     <div style={{ width: "100%", height: "180px", background: "#f3f4f6", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
                                         {product.thumbnail ? (
                                             <img src={product.thumbnail} alt={product.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                                         ) : (
-                                            <span style={{ fontSize: "40px" }}>🖼️</span>
+                                            <span style={{ fontSize: "40px" }}>No Image</span>
                                         )}
                                     </div>
                                     <div style={{ padding: "15px" }}>
@@ -234,10 +295,48 @@ const Dashboard = () => {
                                             <div style={{ fontSize: "20px", fontWeight: "800", color: "#1f2937" }}>${product.price}</div>
                                             <div style={{ fontSize: "14px", fontWeight: "700", color: product.stock > 10 ? "#10b981" : "#ef4444" }}>{product.stock} in stock</div>
                                         </div>
-                                        <div style={{ display: "flex", gap: "8px" }}>
-                                            <button onClick={() => openEditModal(product)} style={{ flex: 1, padding: "8px", background: "#3b82f6", color: "white", border: "none", borderRadius: "8px", fontSize: "13px", fontWeight: "600", cursor: "pointer" }}>✏️ Edit</button>
-                                            <button onClick={() => handleDelete(product)} style={{ flex: 1, padding: "8px", background: "#ef4444", color: "white", border: "none", borderRadius: "8px", fontSize: "13px", fontWeight: "600", cursor: "pointer" }}>🗑️ Delete</button>
-                                        </div>
+                                        {product.isMyProduct && (
+                                            <div style={{ display: "flex", gap: "10px" }}>
+                                                <button
+                                                    onClick={() => openEditModal(product)}
+                                                    style={{
+                                                        flex: 1,
+                                                        padding: "10px",
+                                                        background: "#f3f4f6",
+                                                        color: "#1f2937",
+                                                        border: "none",
+                                                        borderRadius: "8px",
+                                                        fontSize: "13px",
+                                                        fontWeight: "600",
+                                                        cursor: "pointer",
+                                                        transition: "all 0.2s"
+                                                    }}
+                                                    onMouseEnter={(e) => e.target.style.background = "#e5e7eb"}
+                                                    onMouseLeave={(e) => e.target.style.background = "#f3f4f6"}
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(product)}
+                                                    style={{
+                                                        flex: 1,
+                                                        padding: "10px",
+                                                        background: "#fee2e2",
+                                                        color: "#991b1b",
+                                                        border: "none",
+                                                        borderRadius: "8px",
+                                                        fontSize: "13px",
+                                                        fontWeight: "600",
+                                                        cursor: "pointer",
+                                                        transition: "all 0.2s"
+                                                    }}
+                                                    onMouseEnter={(e) => e.target.style.background = "#fecaca"}
+                                                    onMouseLeave={(e) => e.target.style.background = "#fee2e2"}
+                                                >
+                                                    Delete
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             ))}
@@ -261,7 +360,7 @@ const Dashboard = () => {
             {showModal && (
                 <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.6)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000, padding: "20px" }} onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}>
                     <div style={{ background: "white", borderRadius: "16px", padding: "28px", maxWidth: "550px", width: "100%", maxHeight: "90vh", overflowY: "auto" }}>
-                        <h2 style={{ margin: "0 0 20px 0", fontSize: "24px", fontWeight: "700", color: "#1f2937" }}>{editingProduct ? "✏️ Edit Product" : "✨ Create New Product"}</h2>
+                        <h2 style={{ margin: "0 0 20px 0", fontSize: "24px", fontWeight: "700", color: "#1f2937" }}>{editingProduct ? "Edit Product" : "Create New Product"}</h2>
                         <form onSubmit={handleSubmit}>
                             <div style={{ marginBottom: "16px" }}>
                                 <label style={{ display: "block", marginBottom: "6px", fontWeight: "600", color: "#374151", fontSize: "13px" }}>Title *</label>
@@ -298,7 +397,7 @@ const Dashboard = () => {
                                 {imagePreview && (<div style={{ marginTop: "12px", textAlign: "center" }}><img src={imagePreview} alt="Preview" style={{ maxWidth: "100%", maxHeight: "150px", borderRadius: "8px" }} /></div>)}
                             </div>
                             <div style={{ display: "flex", gap: "10px" }}>
-                                <button type="submit" style={{ flex: 1, padding: "12px", background: "#1f2937", color: "white", border: "none", borderRadius: "10px", fontSize: "15px", fontWeight: "600", cursor: "pointer" }}>{editingProduct ? "💾 Update" : "✨ Create"}</button>
+                                <button type="submit" style={{ flex: 1, padding: "12px", background: "#1f2937", color: "white", border: "none", borderRadius: "10px", fontSize: "15px", fontWeight: "600", cursor: "pointer" }}>{editingProduct ? "Update" : "Create"}</button>
                                 <button type="button" onClick={() => setShowModal(false)} style={{ flex: 1, padding: "12px", background: "#6b7280", color: "white", border: "none", borderRadius: "10px", fontSize: "15px", fontWeight: "600", cursor: "pointer" }}>Cancel</button>
                             </div>
                         </form>

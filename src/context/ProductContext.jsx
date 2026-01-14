@@ -4,24 +4,17 @@ import api from "../api/axios";
 export const ProductContext = createContext();
 
 export const ProductProvider = ({ children }) => {
-    const [products, setProducts] = useState(async () => {
-        if(localStorage.getItem("products")){
-            return JSON.parse(localStorage.getItem("products"));
-        }else{
-            const res = await api.get("/products/categories");
-            return res.data;
-        }
+    const [products, setProducts] = useState(() => {
+        const storedProducts = localStorage.getItem("products");
+        return storedProducts ? JSON.parse(storedProducts) : [];
     });
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        if(!localStorage.getItem("products")){
-            localStorage.setItem("products", JSON.stringify(products))
-        }
-        console.log({init_products: products});
-    }, [])
+        localStorage.setItem("products", JSON.stringify(products));
+    }, [products]);
     // Fetch categories on mount
     useEffect(() => {
         const fetchCategories = async () => {
@@ -43,19 +36,40 @@ export const ProductProvider = ({ children }) => {
         try {
             let url = "/products?limit=100";
 
-            // Apply category filter
             if (category !== "all") {
                 url = `/products/category/${category}`;
             }
 
-            // Apply sorting parameters
             if (sortBy && sortOrder) {
                 url += `${url.includes("?") ? "&" : "?"}sortBy=${sortBy}&order=${sortOrder}`;
             }
 
             const response = await api.get(url);
-            setProducts(response.data.products || []);
-            localStorage.setItem("products", JSON.stringify(products));
+            const apiProducts = response.data.products || [];
+
+            // Get local storage data
+            const storedMyProducts = localStorage.getItem("myProducts");
+            const myProducts = storedMyProducts ? JSON.parse(storedMyProducts) : [];
+
+            const storedDeleted = localStorage.getItem("deletedProducts");
+            const deletedIds = storedDeleted ? JSON.parse(storedDeleted) : [];
+
+            // Filter API products to remove those marked as "deleted"
+            const filteredApiProducts = apiProducts
+                .filter(p => !deletedIds.includes(p.id))
+                .map(p => {
+                    // Apply overrides if any
+                    const override = myProducts.find(mp => mp.id === p.id);
+                    return override ? { ...p, ...override } : p;
+                });
+
+            // Get local products only (those that aren't overrides)
+            const filteredMyProducts = category === "all"
+                ? myProducts.filter(p => !apiProducts.some(ap => ap.id === p.id))
+                : myProducts.filter(p => p.category === category && !apiProducts.some(ap => ap.id === p.id));
+
+            // Merge products
+            setProducts([...filteredMyProducts, ...filteredApiProducts]);
         } catch (err) {
             console.error("Error fetching products:", err);
             setError("Failed to fetch products. Please try again.");

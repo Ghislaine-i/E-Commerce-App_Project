@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { ProductContext } from "../context/ProductContext";
 import ProductCard from "../components/ProductCard";
+import CategoryFilter from "../components/CategoryFilter";
 
 const Home = () => {
     const { products, categories, fetchProducts, loading, error } = useContext(ProductContext);
@@ -64,13 +65,12 @@ const Home = () => {
                 }} />
                 <div style={{ maxWidth: "1400px", margin: "0 auto", position: "relative", zIndex: 1 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "15px", marginBottom: "15px" }}>
-                        <span style={{ fontSize: "48px" }}>🛒</span>
                         <div>
-                            <h1 style={{ margin: 0, fontSize: "36px", fontWeight: "800" }}>
-                                Welcome to Our Store
+                            <h1 style={{ margin: 0, fontSize: "42px", fontWeight: "800", color: "#111827" }}>
+                                Explore Collections
                             </h1>
-                            <p style={{ margin: "8px 0 0 0", fontSize: "18px", opacity: 0.9 }}>
-                                Discover amazing products at unbeatable prices
+                            <p style={{ margin: "12px 0 0 0", fontSize: "18px", color: "#4b5563" }}>
+                                Premium products curated for you
                             </p>
                         </div>
                     </div>
@@ -79,17 +79,16 @@ const Home = () => {
                         we have everything you need. Use the filters below to find exactly what you're looking for!
                     </p>
                     <div style={{ display: "flex", gap: "15px", marginTop: "25px", flexWrap: "wrap" }}>
-                        <div style={{ background: "rgba(255,255,255,0.2)", backdropFilter: "blur(10px)", padding: "12px 20px", borderRadius: "10px", display: "flex", alignItems: "center", gap: "8px" }}>
-                            <span style={{ fontSize: "20px" }}>📦</span>
-                            <span style={{ fontWeight: "600" }}>{filteredProducts.length} Products</span>
+                        <div style={{ background: "rgba(31,41,55,0.05)", padding: "12px 20px", borderRadius: "12px", border: "1px solid rgba(31,41,55,0.1)", display: "flex", alignItems: "center", gap: "8px" }}>
+                            <span style={{ fontWeight: "700", color: "#111827" }}>{filteredProducts.length}</span>
+                            <span style={{ fontSize: "14px", color: "#4b5563" }}>Products</span>
                         </div>
-                        <div style={{ background: "rgba(255,255,255,0.2)", backdropFilter: "blur(10px)", padding: "12px 20px", borderRadius: "10px", display: "flex", alignItems: "center", gap: "8px" }}>
-                            <span style={{ fontSize: "20px" }}>🏷️</span>
-                            <span style={{ fontWeight: "600" }}>{categories.length} Categories</span>
+                        <div style={{ background: "rgba(31,41,55,0.05)", padding: "12px 20px", borderRadius: "12px", border: "1px solid rgba(31,41,55,0.1)", display: "flex", alignItems: "center", gap: "8px" }}>
+                            <span style={{ fontWeight: "700", color: "#111827" }}>{categories.length}</span>
+                            <span style={{ fontSize: "14px", color: "#4b5563" }}>Categories</span>
                         </div>
-                        <div style={{ background: "rgba(255,255,255,0.2)", backdropFilter: "blur(10px)", padding: "12px 20px", borderRadius: "10px", display: "flex", alignItems: "center", gap: "8px" }}>
-                            <span style={{ fontSize: "20px" }}>🚚</span>
-                            <span style={{ fontWeight: "600" }}>Free Shipping</span>
+                        <div style={{ background: "rgba(31,41,55,0.05)", padding: "12px 20px", borderRadius: "12px", border: "1px solid rgba(31,41,55,0.1)", display: "flex", alignItems: "center", gap: "8px" }}>
+                            <span style={{ fontSize: "14px", fontWeight: "700", color: "#10b981" }}>Free Shipping</span>
                         </div>
                     </div>
                 </div>
@@ -134,29 +133,11 @@ const Home = () => {
                         </div>
 
                         {/* Category Filter */}
-                        <div>
-                            <label style={{ display: "block", marginBottom: "5px", fontWeight: "600", fontSize: "13px" }}>
-                                Category
-                            </label>
-                            <select
-                                value={category}
-                                onChange={(e) => setCategory(e.target.value)}
-                                style={{
-                                    width: "100%",
-                                    padding: "8px",
-                                    border: "1px solid #ddd",
-                                    borderRadius: "5px",
-                                    fontSize: "13px",
-                                }}
-                            >
-                                <option value="all">All Categories</option>
-                                {categories.map((cat) => (
-                                    <option key={cat.slug} value={cat.slug}>
-                                        {cat.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                        <CategoryFilter
+                            categories={categories}
+                            selectedCategory={category}
+                            onCategoryChange={setCategory}
+                        />
 
                         {/* Sort By */}
                         <div>
